@@ -1,8 +1,6 @@
 name: "Build & Deploy to Netlify"
 on:
-  push:
-    branches:
-      - main
+  pull_request:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
