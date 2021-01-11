@@ -48,7 +48,7 @@ async function fetchMetrics(queryType, queryArgs = {}) {
     params.set(key, String(value));
   }
 
-  const response = await fetch(`https://status.nixos.org/prometheus/api/v1/${queryType}?${params}`);
+  const response = await fetch(`https://monitoring.nixos.org/prometheus/api/v1/${queryType}?${params}`);
   const {
     data
   } = await response.json();
