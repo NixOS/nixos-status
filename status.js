@@ -123,7 +123,7 @@ const jobsetData = fetchMetrics('query_range', {
           job,
           job_history: values.map(state => state[1] == 0),
           oldest_status: values[0][0],
-          hydra_url: `https://hydra.nixos.org/job/${project}/${jobset}/${job}`,
+          hydra_url: `https://hydra.nixos.org/job/${project}/${jobset}/${job}#tabs-constituents`,
         },
       };
     })
