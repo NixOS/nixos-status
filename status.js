@@ -215,10 +215,23 @@ init
       hydraLink.href = record['hydra_url'];
       hydraLink.innerText = [record['project'], record['jobset'], record['job']].join('/');
 
+      statusToColor = status => status ? "#b5ffb5" : "#ff9e9e";
+
       var hydra = row.getElementsByClassName("hydra")[0];
-      hydra.style.backgroundImage = "linear-gradient(to right, " +
-        (record['job_history'].map(val => val ? "#b5ffb5" : "#ff9e9e")).join(", ") +
-        ")";
+      switch (record['job_history'].length) {
+        case 0:
+          // Unknown, no color, leave it gray.
+          break;
+        case 1:
+          hydra.style.backgroundColor = statusToColor(record['job_history'][0]);
+          break;
+        default:
+          hydra.style.backgroundImage = "linear-gradient(to right, " +
+            (record['job_history'].map(statusToColor)).join(", ") +
+            ")";
+          break;
+      }
+
       hydra.title = `The Hydra job's state over time, since ${record['oldest_status_relative']}`;
 
       if (record['job_history'][record['job_history'].length - 1] == 0) {
