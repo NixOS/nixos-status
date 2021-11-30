@@ -215,7 +215,7 @@ init
       hydraLink.href = record['hydra_url'];
       hydraLink.innerText = [record['project'], record['jobset'], record['job']].join('/');
 
-      statusToColor = status => status ? "#b5ffb5" : "#ff9e9e";
+      const statusToColor = status => status ? "#b5ffb5" : "#ff9e9e";
 
       var hydra = row.getElementsByClassName("hydra")[0];
       switch (record['job_history'].length) {
