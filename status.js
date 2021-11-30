@@ -1,36 +1,34 @@
-function init() {
-  return new Promise(resolve => {
-    window.onload = () => {
-      var tbody = document.getElementById("channel-status");
-      tbody.innerHTML = "<tr><td class='jsfallback' colspan='5'>Loading data from Prometheus...</td></tr>";
-      resolve();
-    };
-  });
-}
+var init = new Promise(resolve => {
+  window.onload = () => {
+    var tbody = document.getElementById("channel-status");
+    tbody.innerHTML = "<tr><td class='jsfallback' colspan='5'>Loading data from Prometheus...</td></tr>";
+    resolve();
+  }
+});
 
 async function fetchIssues(label) {
-    const response = await fetch(`https://api.github.com/repos/NixOS/nixpkgs/issues?labels=${label}`);
-    return await response.json();
+  const response = await fetch(`https://api.github.com/repos/NixOS/nixpkgs/issues?labels=${label}`);
+  return await response.json();
 }
 
 fetchIssues("1.severity%3A%20channel%20blocker")
-    .then(data => data.map(issue => {
-        var el = document.createElement('div');
-        el.classList = "alert alert-warning";
-        el.innerHTML = '<span class="issue-age"></span> <a class="issue-link"></a>';
-        const since = moment(issue['created_at']).fromNow();
-        el.getElementsByClassName('issue-age')[0].innerText = since;
-        el.getElementsByClassName('issue-link')[0].href = issue['html_url'];
-        el.getElementsByClassName('issue-link')[0].innerText = issue['title'];
-        if (issue['labels'].find(label => label['name'] == 'infrastructure')) {
-            el.innerHTML += ' <span class="label label-important">Infrastructure</span>'
-        }
-        return el;
-    }))
-    .then(elems => {
-        var alerts = document.getElementById('alerts');
-        elems.forEach(el => alerts.appendChild(el));
-    });
+  .then(data => data.map(issue => {
+    var el = document.createElement('div');
+    el.classList = "alert alert-warning";
+    el.innerHTML = '<span class="issue-age"></span> <a class="issue-link"></a>';
+    const since = moment(issue['created_at']).fromNow();
+    el.getElementsByClassName('issue-age')[0].innerText = since;
+    el.getElementsByClassName('issue-link')[0].href = issue['html_url'];
+    el.getElementsByClassName('issue-link')[0].innerText = issue['title'];
+    if (issue['labels'].find(label => label['name'] == 'infrastructure')) {
+      el.innerHTML += ' <span class="label label-important">Infrastructure</span>'
+    }
+    return el;
+  }))
+  .then(elems => {
+    var alerts = document.getElementById('alerts');
+    elems.forEach(el => alerts.appendChild(el));
+  });
 
 function aggregateByChannel(result) {
   return result.reduce((acc, {
@@ -57,8 +55,8 @@ async function fetchMetrics(queryType, queryArgs = {}) {
 }
 
 const revisionData = fetchMetrics('query', {
-    query: 'channel_revision'
-  })
+  query: 'channel_revision'
+})
   .then(records => (
     records.map(({
       metric
@@ -75,8 +73,8 @@ const revisionData = fetchMetrics('query', {
 
 
 const updateTimeData = fetchMetrics('query', {
-    query: 'channel_update_time'
-  })
+  query: 'channel_update_time'
+})
   .then(records => (
     records.map(({
       metric,
@@ -94,17 +92,17 @@ var earliestStart = moment.utc("2019-12-30T01:00:00Z");
 var idealStart = moment.utc().subtract(30, "days");
 var start;
 if (idealStart > earliestStart) {
-    start = idealStart;
+  start = idealStart;
 } else {
-    start = earliestStart;
+  start = earliestStart;
 }
 var end = moment.utc().format();
 const jobsetData = fetchMetrics('query_range', {
-    query: 'hydra_job_failed',
-    start: start.format(),
-    end,
-    step: '1h'
-  })
+  query: 'hydra_job_failed',
+  start: start.format(),
+  end,
+  step: '1h'
+})
   .then(records => (
     records.map(({
       metric,
@@ -148,7 +146,7 @@ function cmp_channels(left, right) {
   return normalize_channel(left) < normalize_channel(right)
 }
 
-init()
+init
   .then(() => Promise.all([revisionData, updateTimeData, jobsetData]))
   .then(([revisions, update_times, jobsets]) => {
     var combined = [];
@@ -172,11 +170,11 @@ init()
         // do not use color indications on outdated channels
         if (jobset['current']) {
           if (m > moment().subtract(3, 'days')) {
-          jobset['update_age'] = "success";
+            jobset['update_age'] = "success";
           } else if (m > moment().subtract(10, 'days')) {
-          jobset['update_age'] = "warning";
+            jobset['update_age'] = "warning";
           } else {
-          jobset['update_age'] = "important";
+            jobset['update_age'] = "important";
           }
         }
       } else {
@@ -217,10 +215,23 @@ init()
       hydraLink.href = record['hydra_url'];
       hydraLink.innerText = [record['project'], record['jobset'], record['job']].join('/');
 
+      const statusToColor = status => status ? "#b5ffb5" : "#ff9e9e";
+
       var hydra = row.getElementsByClassName("hydra")[0];
-      hydra.style.backgroundImage = "linear-gradient(to right, " +
-        (record['job_history'].map(val => val ? "#b5ffb5" : "#ff9e9e")).join(", ") +
-        ")";
+      switch (record['job_history'].length) {
+        case 0:
+          // Unknown, no color, leave it gray.
+          break;
+        case 1:
+          hydra.style.backgroundColor = statusToColor(record['job_history'][0]);
+          break;
+        default:
+          hydra.style.backgroundImage = "linear-gradient(to right, " +
+            (record['job_history'].map(statusToColor)).join(", ") +
+            ")";
+          break;
+      }
+
       hydra.title = `The Hydra job's state over time, since ${record['oldest_status_relative']}`;
 
       if (record['job_history'][record['job_history'].length - 1] == 0) {
