@@ -43,30 +43,10 @@
           imagemagick
           nodePackages.less
           serve
-
-          #asciinema-scenario
-          #gnused
-          #jq
-          #libxml2
-          #libxslt
-          #linkchecker
-          #nixFlakes
-          #perl
-          #perlPackages.AppConfig
-          #perlPackages.JSON
-          #perlPackages.TemplatePluginIOAll
-          #perlPackages.TemplatePluginJSONEscape
-          #perlPackages.TemplateToolkit
-          #perlPackages.XMLSimple
-          #serve
-          #shuffle_commercial_providers
-          #update_blog
-          #xhtml1
-          #xidel
         ];
 
         preBuild = ''
-          ln -s ${nixos-common-styles.packages."${system}".commonStyles} less/common-styles
+          ln -s ${nixos-common-styles.packages."${system}".commonStyles} styles/common-styles
         '';
 
         installPhase = ''
