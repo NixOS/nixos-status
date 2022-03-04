@@ -1,0 +1,60 @@
+@import "./common-styles/index";
+
+// TODO: asciinema is included in every build
+
+body {
+  & > header {
+    &:extend(.navigation-bar all);
+
+    margin-bottom: 0;
+  }
+
+  // TODO: why is this not possible?
+  //& > div.page-title {
+  //   &:extend(.page-title all);
+  //}
+
+  & > div.page-description {
+      //TODO: &:extend(.page-description all);
+      #container();
+
+      font-weight: bold;
+      font-size: 120%;
+      color: #theme.color[gray-dark];
+  }
+
+  & > main > #alerts {
+    #container();
+
+    & > .notice-box {
+      & > .issue-age {
+        display: inline-block;
+        min-width: 6em;
+      }
+      & > a.issue-link {
+        color: #theme.color[blue-dark];
+      }
+    }
+  }
+
+  & > main > div#content {
+    #container();
+
+    & > table.styled-table  { 
+      & > thead { font-size: 130%; }
+      & > tbody { font-size: 100%; }
+
+      & > thead > tr > th { background: inherit; }
+      & > tbody > tr.stale { opacity: 60%; }
+    }
+
+    .label {
+      font-size: 100%;
+      margin-right: 0.4em;
+    }
+  }
+
+  & > footer {
+    &:extend(.page-footer all);
+  }
+}
