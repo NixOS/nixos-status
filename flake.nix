@@ -46,16 +46,13 @@
         ];
 
         preBuild = ''
+          rm -f styles/common-styles
           ln -s ${nixos-common-styles.packages."${system}".commonStyles} styles/common-styles
         '';
 
         installPhase = ''
           mkdir $out
-          cp index.html \
-             status.css \
-             status.js \
-             netlify.toml \
-               $out/
+          cp -R output/* $out/
         '';
 
         shellHook = ''
