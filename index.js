@@ -13,15 +13,15 @@ async function fetchIssues(label) {
 
 fetchIssues("1.severity%3A%20channel%20blocker")
   .then(data => data.map(issue => {
-    var el = document.createElement('div');
-    el.classList = "alert alert-warning";
+    var el = document.createElement('aside');
+    el.classList = "notice-box -warning";
     el.innerHTML = '<span class="issue-age"></span> <a class="issue-link"></a>';
     const since = moment(issue['created_at']).fromNow();
     el.getElementsByClassName('issue-age')[0].innerText = since;
     el.getElementsByClassName('issue-link')[0].href = issue['html_url'];
     el.getElementsByClassName('issue-link')[0].innerText = issue['title'];
     if (issue['labels'].find(label => label['name'] == 'infrastructure')) {
-      el.innerHTML += ' <span class="label label-important">Infrastructure</span>'
+      el.innerHTML += ' <span class="label -warning">Infrastructure</span>'
     }
     return el;
   }))
@@ -174,7 +174,7 @@ init
           } else if (m > moment().subtract(10, 'days')) {
             jobset['update_age'] = "warning";
           } else {
-            jobset['update_age'] = "important";
+            jobset['update_age'] = "danger";
           }
         }
       } else {
@@ -205,7 +205,9 @@ init
       var date = row.getElementsByClassName("age")[0];
       date.innerText = record['update_time_relative'];
       date.title = record['update_time_local'];
-      date.classList.add("label-" + record['update_age']);
+      if (record['update_age'] !== undefined) {
+        date.classList.add("-" + record['update_age']);
+      }
 
       var revisions = row.getElementsByClassName("revision")[0];
       revisions.innerText = record['short_revision'];
