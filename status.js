@@ -161,6 +161,7 @@ init
         jobset['short_revision'] = revisions[channel]['short_revision'];
         jobset['github_url'] = revisions[channel]['github_url'];
         jobset['status'] = revisions[channel]['status'];
+        jobset['current'] = revisions[channel]['status'] != "unmaintained";
       } else {
         continue
       }
@@ -195,7 +196,7 @@ init
       row.innerHTML = '<td class="channel" /><td><span class="age label"></span></td><td class="github"><a class="revision" /></td><td class="hydra"><a class="hydra-link" /></td><td class="status"></td>';
       var status = row.getElementsByClassName("status")[0];
 
-      if (record['status'] != 'unmaintained') {
+      if (record['current']) {
         row.classList.add("current")
       }
       row.getElementsByClassName("channel")[0].innerText = record['channel'];
