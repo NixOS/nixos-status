@@ -66,6 +66,7 @@ const revisionData = fetchMetrics('query', {
         revision: metric.revision,
         short_revision: metric.revision.substring(0, 12),
         github_url: `https://github.com/NixOS/nixpkgs/commit/${metric.revision}`,
+        status: metric.status,
       },
     }))
   ))
@@ -115,7 +116,6 @@ const jobsetData = fetchMetrics('query_range', {
       return {
         channel: metric.channel,
         value: {
-          current: metric.current == 1,
           project,
           jobset,
           job,
@@ -160,6 +160,7 @@ init
         jobset['revision'] = revisions[channel]['revision'];
         jobset['short_revision'] = revisions[channel]['short_revision'];
         jobset['github_url'] = revisions[channel]['github_url'];
+        jobset['status'] = revisions[channel]['status'];
       } else {
         continue
       }
@@ -194,11 +195,8 @@ init
       row.innerHTML = '<td class="channel" /><td><span class="age label"></span></td><td class="github"><a class="revision" /></td><td class="hydra"><a class="hydra-link" /></td><td class="status"></td>';
       var status = row.getElementsByClassName("status")[0];
 
-      if (record['current']) {
+      if (record['status'] != 'unmaintained') {
         row.classList.add("current")
-      } else {
-        row.classList.add("stale")
-        status.innerHTML += '<span class="label label-important">End of life</span>';
       }
       row.getElementsByClassName("channel")[0].innerText = record['channel'];
 
@@ -234,9 +232,26 @@ init
 
       hydra.title = `The Hydra job's state over time, since ${record['oldest_status_relative']}`;
 
-      if (record['job_history'][record['job_history'].length - 1] == 0) {
+      switch (record['status']) {
+        case "beta":
+          status.innerHTML += '<span class="label label-info">Beta</span>';
+          break;
+        case "deprecated":
+          status.innerHTML += '<span class="label label-warning">Deprecated</span>';
+          break;
+        case "unmaintained":
+          row.classList.add("stale")
+          status.innerHTML += '<span class="label label-important">End of life</span>';
+          break;
+        case "stable":
+          status.innerHTML += '<span class="label label-success">Stable</span>';
+          break;
+        case "rolling":
+          status.innerHTML += '<span class="label label-success">Rolling</span>';
+          break;
+      }
+      if (record['job_history'][record['job_history'].length - 1] == 0 && record['status'] != "unmaintained") {
         status.innerHTML += '<span class="label label-important">Build problem</span>';
-
       }
       return row;
     })
