@@ -116,6 +116,7 @@ const jobsetData = fetchMetrics('query_range', {
       return {
         channel: metric.channel,
         value: {
+          current: metric.current == 1,
           project,
           jobset,
           job,
@@ -161,7 +162,6 @@ init
         jobset['short_revision'] = revisions[channel]['short_revision'];
         jobset['github_url'] = revisions[channel]['github_url'];
         jobset['status'] = revisions[channel]['status'];
-        jobset['current'] = revisions[channel]['status'] != "unmaintained";
       } else {
         continue
       }
