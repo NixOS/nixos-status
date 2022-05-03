@@ -48,6 +48,17 @@
     margin-right: 0.2em;
 }
 
+.logo {
+    margin-right: 5px;
+    padding-right: 0;
+    transition: transform .2s;
+}
+
+a:hover img.logo {
+    transform: rotate(120deg);
+}
+
+
 @media screen and (prefers-color-scheme: dark) {
     html {
         background-color: #1f1f1f;
