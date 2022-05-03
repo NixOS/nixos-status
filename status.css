@@ -67,6 +67,9 @@ a:hover img.logo {
         background-color: #1f1f1f;
         color: #fafafa !important;
     }
+    a.hydra-link {
+        color: #0056b3;
+    }
 
     /*
     Navbar
@@ -100,6 +103,10 @@ a:hover img.logo {
         background-color: #2f2f30;
         color: white;
         background-image: none;
+    }
+
+    .navbar a:hover {
+        color: #fafafa !important;
     }
 
     /*
