@@ -139,12 +139,20 @@ function split_channel(channel) {
 }
 
 function normalize_channel(channel) {
-  parts = split_channel(channel);
+  const parts = split_channel(channel);
   return [parts['time'], parts['collection'], parts['qualifier']].join("-");
 }
 
 function cmp_channels(left, right) {
-  return normalize_channel(left) < normalize_channel(right)
+  const norm_left = normalize_channel(left);
+  const norm_right = normalize_channel(right);
+  if (norm_left < norm_right) {
+    return 1;
+  } else if (norm_left > norm_right) {
+    return -1;
+  } else {
+    return 0;
+  }
 }
 
 init
