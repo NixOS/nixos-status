@@ -1,11 +1,11 @@
 [[redirects]]
   from = "/grafana/*"
-  to = "https://monitoring.nixos.org/grafana/:splat"
+  to = "https://grafana.nixos.org/:splat"
   status = 200
   force = true
 
 [[redirects]]
   from = "/prometheus/*"
-  to = "https://monitoring.nixos.org/prometheus/:splat"
+  to = "https://prometheus.nixos.org/:splat"
   status = 200
   force = true
