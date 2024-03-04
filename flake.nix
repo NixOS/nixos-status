@@ -1,38 +1,21 @@
 {
   description = "The status.nixos.org website.";
 
-  inputs.nixpkgs = { url = "nixpkgs/nixos-unstable"; };
+  inputs.nixpkgs.url = "nixpkgs/nixos-unstable";
+  inputs.flake-utils.url = "github:numtide/flake-utils";
 
   outputs =
     { self
     , nixpkgs 
+    , flake-utils
     }:
-    let
-      system = "x86_64-linux";
-      pkgs = import nixpkgs { inherit system; };
-
-    in rec {
-
-      defaultPackage."${system}" = packages."${system}".status-nixos-org;
-
-      checks."${system}".build = defaultPackage."${system}";
-
-      packages."${system}".status-nixos-org = pkgs.stdenv.mkDerivation {
-        name = "nixos-homepage-${self.lastModifiedDate}";
-
-        src = self;
-
-        enableParallelBuilding = true;
-
-        installPhase = ''
+    flake-utils.lib.eachDefaultSystem (system:
+      let pkgs = nixpkgs.legacyPackages.${system}; in
+      {
+        packages.default = pkgs.runCommand "nixos-homepage" {} ''
           mkdir $out
-          cp index.html \
-             status.css \
-             status.js \
-             netlify.toml \
-               $out/
+          cp -R ${./www}/* $out/
         '';
-      };
-
-  };
+      }
+    );
 }
