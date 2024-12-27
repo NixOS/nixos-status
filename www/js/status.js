@@ -89,19 +89,10 @@ const updateTimeData = fetchMetrics('query', {
   ))
   .then(aggregateByChannel);
 
-var earliestStart = moment.utc("2019-12-30T01:00:00Z");
-var idealStart = moment.utc().subtract(30, "days");
-var start;
-if (idealStart > earliestStart) {
-  start = idealStart;
-} else {
-  start = earliestStart;
-}
-var end = moment.utc().format();
 const jobsetData = fetchMetrics('query_range', {
   query: 'hydra_job_failed',
-  start: start.format(),
-  end,
+  start: moment.utc().subtract(30, "days").format(),
+  end: moment.utc().format(),
   step: '1h'
 })
   .then(records => (
