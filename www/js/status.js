@@ -54,6 +54,21 @@ async function fetchMetrics(queryType, queryArgs = {}) {
   return data.result;
 }
 
+async function fetchCommitDate(commit) {
+  const response = await fetch(`https://api.github.com/repos/NixOS/nixpkgs/commits/${commit}`);
+  const data = await response.json();
+  return moment.utc(data.commit.author.date);
+}
+
+function fetchAllCommits(revisions) {
+  let promises = {};
+  for (let i = 0; i < revisions.length; i++) {
+    const revision = revisions[i];
+    promises[revision] = (fetchCommitDate(revision))
+  };
+  return promises;
+}
+
 const revisionData = fetchMetrics('query', {
   query: 'channel_revision'
 })
@@ -147,8 +162,19 @@ function cmp_channels(left, right) {
 }
 
 init
-  .then(() => Promise.all([revisionData, updateTimeData, jobsetData]))
-  .then(([revisions, update_times, jobsets]) => {
+  .then(() => Promise.all([revisionData, jobsetData]))
+  .then(async ([revisions, jobsets]) => {
+    const all_commits = Object.values(revisions).map((v) => v.revision);
+
+    const commit_dates_promises = fetchAllCommits(all_commits);
+    const commit_dates_entries = await Promise.all(
+      Object.entries(commit_dates_promises).map(async ([key, promise]) => [key, await promise])
+    );
+    const commit_dates = Object.fromEntries(commit_dates_entries);
+
+    return [revisions, commit_dates, jobsets];
+  })
+  .then(([revisions, commit_dates, jobsets]) => {
     var combined = [];
 
     for (let [channel, jobset] of Object.entries(jobsets)) {
@@ -164,15 +190,16 @@ init
       } else {
         continue
       }
-      if (update_times[channel] != undefined) {
-        var m = moment.unix(update_times[channel]['update_time']);
-        jobset['update_time_relative'] = m.fromNow()
-        jobset['update_time_local'] = m.format()
+
+      const commit_date = commit_dates[revisions[channel]['revision']];
+      if (commit_date != undefined) {
+        jobset['update_time_relative'] = commit_date.fromNow()
+        jobset['update_time_local'] = commit_date.format()
         // do not use color indications on outdated channels
         if (jobset['current']) {
-          if (m > moment().subtract(3, 'days')) {
+          if (commit_date > moment().subtract(3, 'days')) {
             jobset['update_age'] = "success";
-          } else if (m > moment().subtract(10, 'days')) {
+          } else if (commit_date > moment().subtract(10, 'days')) {
             jobset['update_age'] = "warning";
           } else {
             jobset['update_age'] = "important";
