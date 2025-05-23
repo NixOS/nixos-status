@@ -16,7 +16,7 @@ fetchIssues("1.severity%3A%20channel%20blocker")
     var el = document.createElement('div');
     el.classList = "alert alert-warning";
     el.innerHTML = '<span class="issue-age"></span> <a class="issue-link"></a>';
-    const since = moment(issue['created_at']).fromNow();
+    const since = timeAgo(new Date(issue['created_at']));
     el.getElementsByClassName('issue-age')[0].innerText = since;
     el.getElementsByClassName('issue-link')[0].href = issue['html_url'];
     el.getElementsByClassName('issue-link')[0].innerText = issue['title'];
@@ -89,18 +89,17 @@ const updateTimeData = fetchMetrics('query', {
   ))
   .then(aggregateByChannel);
 
-var earliestStart = moment.utc("2019-12-30T01:00:00Z");
-var idealStart = moment.utc().subtract(30, "days");
-var start;
+const earliestStart = new Date("2019-12-30T01:00:00Z");
+const idealStart = new Date();
+idealStart.setDate(idealStart.getDate() - 30);
+let start = earliestStart;
 if (idealStart > earliestStart) {
   start = idealStart;
-} else {
-  start = earliestStart;
 }
-var end = moment.utc().format();
+const end = new Date().toISOString();
 const jobsetData = fetchMetrics('query_range', {
   query: 'hydra_job_failed',
-  start: start.format(),
+  start: start.toISOString(),
   end,
   step: '1h'
 })
@@ -161,7 +160,7 @@ init
     var combined = [];
 
     for (let [channel, jobset] of Object.entries(jobsets)) {
-      jobset['oldest_status_relative'] = moment.unix(jobset['oldest_status']).fromNow()
+      jobset['oldest_status_relative'] = timeAgo(new Date(jobset['oldest_status'] * 1000));
       // Ensure each jobset here is in each other dataset, guaranteeing we have
       // complete data.
       jobset['channel'] = channel;
@@ -174,14 +173,15 @@ init
         continue
       }
       if (update_times[channel] != undefined) {
-        var m = moment.unix(update_times[channel]['update_time']);
-        jobset['update_time_relative'] = m.fromNow()
-        jobset['update_time_local'] = m.format()
+        const update_time_date = new Date(update_times[channel]['update_time'] * 1000);
+        jobset['update_time_relative'] = timeAgo(update_time_date);
+        jobset['update_time_local'] = update_time_date.toLocaleString(undefined, { timeZoneName: "short"});
+        const one_day_duration_ms = 24 * 60 * 60 * 1000;
         // do not use color indications on outdated channels
         if (jobset['current']) {
-          if (m > moment().subtract(3, 'days')) {
+          if (update_time_date > new Date(Date.now() - 3 * one_day_duration_ms)) {
             jobset['update_age'] = "success";
-          } else if (m > moment().subtract(10, 'days')) {
+          } else if (update_time_date > new Date(Date.now() - 10 * one_day_duration_ms)) {
             jobset['update_age'] = "warning";
           } else {
             jobset['update_age'] = "important";
@@ -272,3 +272,30 @@ init
       tbody.appendChild(row);
     });
   });
+
+function timeAgo(date) {
+  const formatter = new Intl.RelativeTimeFormat('en');
+  const seconds = Math.floor((new Date() - date) / 1000);
+
+  if (seconds < 60) {
+    return formatter.format(-seconds, 'second');
+  }
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) {
+    return formatter.format(-minutes, 'minute');
+  }
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) {
+    return formatter.format(-hours, 'hour');
+  }
+  const days = Math.floor(hours / 24);
+  if (days < 30) {
+    return formatter.format(-days, 'day');
+  }
+  const months = Math.floor(days / 30);
+  if (months < 12) {
+    return formatter.format(-months, 'month');
+  }
+  const years = Math.floor(days / 365);
+  return formatter.format(-years, 'year');
+}
