@@ -58,6 +58,10 @@ a:hover img.logo {
     transform: rotate(120deg);
 }
 
+.table-striped {
+    display: block;
+    overflow-x: auto;
+}
 
 @media screen and (prefers-color-scheme: dark) {
     html {
@@ -87,6 +91,22 @@ a:hover img.logo {
         text-shadow: none;
     }
 
+    .nav-collapse .nav > li > a:hover,
+    .nav-collapse .nav > li > a:focus,
+    .nav-collapse .dropdown-menu a:hover,
+    .nav-collapse .dropdown-menu a:focus {
+        background-color: #3c3c3c;
+    }
+
+    .navbar .btn-navbar {
+        background: #00000000;
+    }
+    
+    .navbar .btn-navbar:hover, 
+    .navbar .btn-navbar:focus {
+        background-color: #4a4a4a;
+    }
+
     .caret {
         border-top: 4px solid #fafafa;
     }
@@ -114,6 +134,11 @@ a:hover img.logo {
     */
     .table-striped tr:nth-of-type(2n+1) td {
         background-color: initial !important;
+    }
+
+    .table-striped {
+        scrollbar-width: thin;
+        scrollbar-color: #5c5c5c #2d2d2d;
     }
 
     td {
