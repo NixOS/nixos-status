@@ -98,7 +98,7 @@ if (idealStart > earliestStart) {
 }
 const end = new Date().toISOString();
 const jobsetData = fetchMetrics('query_range', {
-  query: 'hydra_job_failed',
+  query: 'hydra_job_failed{exported_job!="unstable"}',
   start: start.toISOString(),
   end,
   step: '1h'
